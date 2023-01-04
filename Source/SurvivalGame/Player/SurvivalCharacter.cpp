@@ -159,11 +159,55 @@ void ASurvivalCharacter::PerformInteractionCheck()
 
 void ASurvivalCharacter::CouldntFindInteractable()
 {
+	if (InteractionData.ViewedInteractionComponent)
+	{
+		InteractionData.ViewedInteractionComponent->SetHiddenInGame(true);
+	}
 }
 
 void ASurvivalCharacter::FoundNewInteractable(UInteractionComponent* Interactable)
 {
-	UE_LOG(LogTemp, Warning, TEXT("we found an interactable"));
+	if (Interactable)
+	{
+		Interactable->SetHiddenInGame(false);
+		InteractionData.ViewedInteractionComponent = Interactable; 
+	}
+}
+
+void ASurvivalCharacter::BeginInteract()
+{
+	if (!HasAuthority())
+	{
+		ServerBeginInteract();
+	}
+}
+
+void ASurvivalCharacter::EndInteract()
+{
+	if (!HasAuthority())
+	{
+		ServerEndInteract();
+	}
+}
+
+void ASurvivalCharacter::ServerEndInteract_Implementation()
+{
+	EndInteract();
+}
+
+bool ASurvivalCharacter::ServerEndInteract_Validate()
+{
+	return true;
+}
+
+void ASurvivalCharacter::ServerBeginInteract_Implementation()
+{
+	BeginInteract();
+}
+
+bool ASurvivalCharacter::ServerBeginInteract_Validate()
+{
+	return true; 
 }
 
 // Called to bind functionality to input
@@ -173,6 +217,9 @@ void ASurvivalCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+
+	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &ASurvivalCharacter::BeginInteract);
+	PlayerInputComponent->BindAction("Interact", IE_Released, this, &ASurvivalCharacter::EndInteract);
 
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ASurvivalCharacter::StartCrouching);
 	PlayerInputComponent->BindAction("Crouch", IE_Released, this, &ASurvivalCharacter::StopCrouching);

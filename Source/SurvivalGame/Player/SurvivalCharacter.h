@@ -80,6 +80,12 @@ protected:
 	void BeginInteract();
 	void EndInteract();
 
+	UFUNCTION(Server, Reliable, WithValidation)
+		void ServerBeginInteract();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+		void ServerEndInteract();
+
 	void Interact();
 
 	//information about the current state of the players interaction
