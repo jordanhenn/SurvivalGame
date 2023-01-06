@@ -6,6 +6,12 @@
 #include "Components/WidgetComponent.h"
 #include "InteractionComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBeginInteract, class ASurvivalCharacter*, Character);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEndInteract, class ASurvivalCharacter*, Character);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBeginFocus, class ASurvivalCharacter*, Character);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEndFocus, class ASurvivalCharacter*, Character);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInteract, class ASurvivalCharacter*, Character);
+
 /**
  * 
  */
@@ -37,5 +43,34 @@ public:
 	//Whether we allow multiple players to interact with the item, or just one at any given time
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interaction")
 	bool bAllowMultipleInteractors;
+
+	//Delegates
+
+	//[local + server] Called when the player presses the interact key whilst focusing on this itneractable actor 
+	UPROPERTY(EditDefaultsOnly, BlueprintAssignable)
+	FOnBeginInteract OnBeginInteract;
+	//[local + server] Called when the player releases the interact key, stops looking at the itneractable actor, or gets too far away after starting an interact
+	UPROPERTY(EditDefaultsOnly, BlueprintAssignable)
+	FOnEndInteract OnEndInteract;
+	//[local + server] Called when the player presses the interact key whilst focusing on this interactable actor
+	UPROPERTY(EditDefaultsOnly, BlueprintAssignable)
+	FOnBeginFocus OnBeginFocus;
+	//[local + server] Called when the player releases the itneract key, stops looking at the interactable actor, or gets too far away after starting an interact
+	UPROPERTY(EditDefaultsOnly, BlueprintAssignable)
+	FOnEndFocus OnEndFocus;
+	//[local + server] Called when the player has interacted with the item for the required amount of time
+	UPROPERTY(EditDefaultsOnly, BlueprintAssignable)
+	FOnInteract OnInteract;
+
+public: 
+	//called on the client when the players interaction check trace begins/ends hitting this item
+	void BeginFocus(class ASurvivalCharacter* Character);
+	void EndFocus(class ASurvivalCharacter* Character);
+
+	//Called on the client when the player begins/ends interaction with the item
+	void BeginInteract(class ASurvivalCharacter* Character);
+	void EndInteract(class ASurvivalCharacter* Character);
+
+	void Interact(class ASurvivalCharacter* Character);
 	
 };

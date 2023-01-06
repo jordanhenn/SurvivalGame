@@ -95,6 +95,7 @@ protected:
 	//Helper function to make grabbing interactable easier
 	FORCEINLINE class UInteractionComponent* GetInteractable() const { return InteractionData.ViewedInteractionComponent;  }
 
+	FTimerHandle TimerHandle_Interact;
 
 	void StartCrouching();
 	void StopCrouching();

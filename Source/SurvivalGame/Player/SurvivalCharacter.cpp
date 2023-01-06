@@ -176,9 +176,32 @@ void ASurvivalCharacter::FoundNewInteractable(UInteractionComponent* Interactabl
 
 void ASurvivalCharacter::BeginInteract()
 {
+	//if you have authority then you are the server 
 	if (!HasAuthority())
 	{
 		ServerBeginInteract();
+	}
+
+	//interact key is being held
+	InteractionData.bInteractHeld = true; 
+	
+	//do you have an interaction component
+	//if you do, call begininteract function on the interaction component
+	if (UInteractionComponent* Interactable = GetInteractable())
+	{
+		Interactable->BeginInteract(this);
+
+		//if interact time is basically zero, interact straight away
+		if (FMath::IsNearlyZero(Interactable->InteractionTime))
+		{
+			Interact();
+		}
+		//otherwise we need to cue up the interact 
+		else
+		{
+			//set timer, pass in timer handle from survivalcharacter.h, saying to interact with the interactable in the set interaction time, false means not to loop
+			GetWorldTimerManager().SetTimer(TimerHandle_Interact, this, &ASurvivalCharacter::Interact, Interactable->InteractionTime, false);
+		}
 	}
 }
 
@@ -187,6 +210,31 @@ void ASurvivalCharacter::EndInteract()
 	if (!HasAuthority())
 	{
 		ServerEndInteract();
+	}
+
+	//interaction key let go (need to end interaction if it was let go before interaction time length 
+	InteractionData.bInteractHeld = false; 
+
+	//clear timer
+	GetWorldTimerManager().ClearTimer(TimerHandle_Interact);
+
+	//if we do have an interactable, we need to call end interact function on it
+	if (UInteractionComponent* Interactable = GetInteractable())
+	{
+		Interactable->EndInteract(this);
+	}
+
+}
+
+void ASurvivalCharacter::Interact()
+{
+	//if we had a duration based interaction cue, clear it as we are about to do the interaction 	
+	GetWorldTimerManager().ClearTimer(TimerHandle_Interact);
+
+	//take interactable and call the interact function on the interactable
+	if (UInteractionComponent* Interactable = GetInteractable())
+	{
+		Interactable->Interact(this);
 	}
 }
 
