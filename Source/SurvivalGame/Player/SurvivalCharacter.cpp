@@ -159,19 +159,38 @@ void ASurvivalCharacter::PerformInteractionCheck()
 
 void ASurvivalCharacter::CouldntFindInteractable()
 {
-	if (InteractionData.ViewedInteractionComponent)
+	//if we were looking at an interactable and now cant find one, we must have stopped looking at that interactable
+	//we've lost focus on an interactable, clear the timer
+	if (GetWorldTimerManager().IsTimerActive(TimerHandle_Interact))
 	{
-		InteractionData.ViewedInteractionComponent->SetHiddenInGame(true);
+		GetWorldTimerManager().ClearTimer(TimerHandle_Interact);
 	}
+
+	//tell interactble we have stopped focusing on it, clear it out
+	if (UInteractionComponent* Interactable = GetInteractable())
+	{
+		Interactable->EndFocus(this);
+
+		if (InteractionData.bInteractHeld)
+		{
+			EndInteract();
+		}
+	}
+
+	InteractionData.ViewedInteractionComponent = nullptr; 
 }
 
 void ASurvivalCharacter::FoundNewInteractable(UInteractionComponent* Interactable)
 {
-	if (Interactable)
+	//if we find an interactable, we want to clear out our previous interactable 
+	EndInteract();
+	//we want to unfocus the old interactable if we had one
+	if (UInteractionComponent* OldInteractable = GetInteractable())
 	{
-		Interactable->SetHiddenInGame(false);
-		InteractionData.ViewedInteractionComponent = Interactable; 
+		OldInteractable->EndFocus(this);
 	}
+	//now we focus on the new interaction component 
+	Interactable->BeginFocus(this);
 }
 
 void ASurvivalCharacter::BeginInteract()

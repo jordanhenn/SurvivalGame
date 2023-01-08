@@ -97,6 +97,14 @@ protected:
 
 	FTimerHandle TimerHandle_Interact;
 
+public:
+	//true if we're interacting with an item that has an interaction time
+	bool IsInteracting() const;
+	//Get the time till we interact with the current interactable
+	float GetRemainingInteractTime() const; 
+
+protected:
+
 	void StartCrouching();
 	void StopCrouching();
 
