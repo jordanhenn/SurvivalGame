@@ -44,6 +44,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Interaction")
 	bool bAllowMultipleInteractors;
 
+	//Call this to change the name of the interactable. Will also refresh the interaction widget
+	UFUNCTION(BlueprintCallable, Category = "Interaction")
+	void SetInteractableNameText(const FText& NewNameText);
+
+	UFUNCTION(BlueprintCallable, Category = "Interaction")
+	void SetInteractableActionText(const FText& NewActionText);
+
 	//Delegates
 
 	//[local + server] Called when the player presses the interact key whilst focusing on this itneractable actor 
@@ -62,7 +69,23 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintAssignable)
 	FOnInteract OnInteract;
 
+protected:
+	//Called when the game starts
+	virtual void Deactivate() override; 
+
+	//allow you to check if a given character is allowed to interact
+	bool CanInteract(class ASurvivalCharacter* Character) const;
+
+	//On the server, this will hold all interactors. On the local player, this will just hold the local player (provided they are an interactor)
+	UPROPERTY()
+	TArray<class ASurvivalCharacter*> Interactors; 
+
 public: 
+	//refresh the interaction widget and its custom widgets
+	//an example of when we'd use this is when we take 3 items out of a stack fo 10, and we need to update widget
+	//so it shows the stack as having x items left
+	void RefreshWidget();
+
 	//called on the client when the players interaction check trace begins/ends hitting this item
 	void BeginFocus(class ASurvivalCharacter* Character);
 	void EndFocus(class ASurvivalCharacter* Character);
@@ -72,5 +95,11 @@ public:
 	void EndInteract(class ASurvivalCharacter* Character);
 
 	void Interact(class ASurvivalCharacter* Character);
+
+	//Return a value from 0-1 denoting how far through the itneract we are
+	//On server this is the first interactors percentage, on client this is the local interactors percentage
+	// this is the function that feeds into progress bar on interaction card
+	UFUNCTION(BlueprintPure, Category = "Interaction")
+	float GetInteractionPercentage();
 	
 };
