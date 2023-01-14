@@ -2,6 +2,7 @@
 
 
 #include "InteractionComponent.h"
+#include "Player/SurvivalCharacter.h"
 
 UInteractionComponent::UInteractionComponent()
 {
@@ -32,11 +33,30 @@ void UInteractionComponent::SetInteractableActionText(const FText& NewActionText
 
 void UInteractionComponent::Deactivate()
 {
+	//call super function because we inherit from widget component which has its own deactivate to so we have to call that as well
+	Super::Deactivate();
+
+	//grab all interactors
+	for (int32 i = Interactors.Num() - 1; i >= 0; --i)
+	{
+		if (ASurvivalCharacter* Interactor = Interactors[i])
+		{
+			//tell them to stop focusing and stop interacting 
+			EndFocus(Interactor);
+			EndInteract(Interactor);
+		}
+	}
+	//clear all interactors
+	Interactors.Empty();
 }
 
 bool UInteractionComponent::CanInteract(ASurvivalCharacter* Character) const
 {
-	return false;
+	//if we dont allow multiple interactors and there is more than one interactor 
+	const bool bPlayerAlreadyInteracting = !bAllowMultipleInteractors && Interactors.Num() >= 1;
+	//return true if not interacting, and is active, owner is not nullptr, character is not nullptr
+	//return false if interacting, not active, owner is nullptr, or character is nullptr
+	return !bPlayerAlreadyInteracting && IsActive() && GetOwner() != nullptr && Character != nullptr;
 }
 
 void UInteractionComponent::RefreshWidget()

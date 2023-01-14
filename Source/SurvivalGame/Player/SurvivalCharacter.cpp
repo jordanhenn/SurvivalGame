@@ -64,7 +64,7 @@ void ASurvivalCharacter::BeginPlay()
 bool ASurvivalCharacter::IsInteracting() const
 {
 	//if timer is active, we are at some point in the interaction event, so we are itneracting
-	return GetWorldTimerManager().IstimerActive(TimerHandle_Interact);
+	return GetWorldTimerManager().IsTimerActive(TimerHandle_Interact);
 }
 
 float ASurvivalCharacter::GetRemainingInteractTime() const
@@ -123,7 +123,7 @@ void ASurvivalCharacter::Tick(float DeltaTime)
 	const bool bIsInteractingOnServer = (HasAuthority() && IsInteracting());
 
 	//if not server or if interacting on server AND the time since last interaction check is greater than the established interaction check frequency 
-	if ((!HasAuthority() || bIsInteractingOnServer) && GetWord()->TimeSince(InteractionData.LastInteractionCheckTime) > InteractionCheckFrequency)
+	if ((!HasAuthority() || bIsInteractingOnServer) && GetWorld()->TimeSince(InteractionData.LastInteractionCheckTime) > InteractionCheckFrequency)
 	{
 		PerformInteractionCheck();
 	}
