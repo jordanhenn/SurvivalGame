@@ -18,14 +18,14 @@ public:
 
 	//c++ callable function that will be called after we change interaction card in some way
 	UFUNCTION(BlueprintCallable, Category = "Interaction")
-		void UpdateInteractionWidget(class UInteractionComponent* Interaction Component);
+		void UpdateInteractionWidget(class UInteractionComponent* InteractionComponent);
 
 	//doing some blueprint implementation to update the card
 	UFUNCTION(BlueprintImplementableEvent)
 		void OnUpdateInteractionWidget();
 
 	//the interaction component the card is using 
-	UFUNCTION(BlueprintReadOnly, Category = "Interaction", meta = (ExposeonSpawn))
+	UPROPERTY(BlueprintReadOnly, Category = "Interaction", meta = (ExposeonSpawn))
 		class UInteractionComponent* OwningInteractionComponent; 
 	
 };

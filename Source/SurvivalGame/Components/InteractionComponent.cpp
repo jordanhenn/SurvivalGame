@@ -2,6 +2,7 @@
 
 
 #include "InteractionComponent.h"
+#include "Widgets/InteractionWidget.h"
 #include "Player/SurvivalCharacter.h"
 
 UInteractionComponent::UInteractionComponent()
@@ -25,10 +26,14 @@ UInteractionComponent::UInteractionComponent()
 
 void UInteractionComponent::SetInteractableNameText(const FText& NewNameText)
 {
+	InteractableNameText = NewNameText;
+	RefreshWidget();
 }
 
 void UInteractionComponent::SetInteractableActionText(const FText& NewActionText)
 {
+	InteractableActionText = NewActionText;
+	RefreshWidget();
 }
 
 void UInteractionComponent::Deactivate()
@@ -61,6 +66,15 @@ bool UInteractionComponent::CanInteract(ASurvivalCharacter* Character) const
 
 void UInteractionComponent::RefreshWidget()
 {
+	//make sure interaction card is not hidden and that we are not the server as server has no UI
+	if (!bHiddenInGame && GetOwner()->GetNetMode() != NM_DedicatedServer)
+	{
+		//make sure the widget is initialized, and that we are displaying the right values (these may have changed)
+		if (UInteractionWidget* InteractionWidget = Cast<UInteractionWidget>(GetUserWidgetObject()))
+		{
+			InteractionWidget->UpdateInteractionWidget(this);
+		}
+	}
 }
 
 void UInteractionComponent::BeginFocus(ASurvivalCharacter* Character)
