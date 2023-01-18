@@ -104,6 +104,8 @@ void UInteractionComponent::BeginFocus(ASurvivalCharacter* Character)
 			}
 		}
 	}
+
+	RefreshWidget();
 }
 
 void UInteractionComponent::EndFocus(ASurvivalCharacter* Character)
