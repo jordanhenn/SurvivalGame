@@ -120,10 +120,10 @@ void ASurvivalCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	const bool bIsInteractingOnServer = (HasAuthority() && IsInteracting());
+	//const bool bIsInteractingOnServer = (GetNetMode() == NM_DedicatedServer && IsInteracting());
 
 	//if not server or if interacting on server AND the time since last interaction check is greater than the established interaction check frequency 
-	if ((!HasAuthority() || bIsInteractingOnServer) && GetWorld()->TimeSince(InteractionData.LastInteractionCheckTime) > InteractionCheckFrequency)
+	if (GetWorld()->TimeSince(InteractionData.LastInteractionCheckTime) > InteractionCheckFrequency)
 	{
 		PerformInteractionCheck();
 	}
@@ -131,6 +131,7 @@ void ASurvivalCharacter::Tick(float DeltaTime)
 
 void ASurvivalCharacter::PerformInteractionCheck()
 {
+
 	if (GetController() == nullptr)
 	{
 		return;
@@ -171,7 +172,9 @@ void ASurvivalCharacter::PerformInteractionCheck()
 			}
 		}
 	}
+
 	CouldntFindInteractable();
+
 }
 
 void ASurvivalCharacter::CouldntFindInteractable()
@@ -207,6 +210,7 @@ void ASurvivalCharacter::FoundNewInteractable(UInteractionComponent* Interactabl
 		OldInteractable->EndFocus(this);
 	}
 	//now we focus on the new interaction component 
+	InteractionData.ViewedInteractionComponent = Interactable;
 	Interactable->BeginFocus(this);
 }
 

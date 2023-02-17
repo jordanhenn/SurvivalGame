@@ -55,7 +55,7 @@ void UInteractionComponent::Deactivate()
 	Interactors.Empty();
 }
 
-bool UInteractionComponent::CanInteract(ASurvivalCharacter* Character) const
+bool UInteractionComponent::CanInteract(class ASurvivalCharacter* Character) const
 {
 	//if we dont allow multiple interactors and there is more than one interactor 
 	const bool bPlayerAlreadyInteracting = !bAllowMultipleInteractors && Interactors.Num() >= 1;
@@ -77,9 +77,9 @@ void UInteractionComponent::RefreshWidget()
 	}
 }
 
-void UInteractionComponent::BeginFocus(ASurvivalCharacter* Character)
+void UInteractionComponent::BeginFocus(class ASurvivalCharacter* Character)
 {
-	//if not active, if we do not have an owner, or character is null -- just return, we dont want to do antthing 
+	//if not active, if we do not have an owner, or character is null -- just return, we dont want to do anything 
 	if (!IsActive() || !GetOwner() || !Character)
 	{
 		return;
@@ -88,12 +88,12 @@ void UInteractionComponent::BeginFocus(ASurvivalCharacter* Character)
 	//broadcasting delegate -- allows interaction to do something custom 
 	OnBeginFocus.Broadcast(Character);
 
-	//show the UI
-	SetHiddenInGame(false);
 
 	//if you are not the server, not doing on server because server doesnt have anyone playing the game 
-	if (!GetOwner()->HasAuthority())
+	if (GetNetMode() != NM_DedicatedServer)
 	{
+		//show UI
+		SetHiddenInGame(false);
 		//grab any visual primtive components
 		for (auto& VisualComp : GetOwner()->GetComponentsByClass(UPrimitiveComponent::StaticClass()))
 		{
@@ -113,25 +113,21 @@ void UInteractionComponent::EndFocus(ASurvivalCharacter* Character)
 	//broadcasting delegate -- allows interaction to do something custom 
 	OnEndFocus.Broadcast(Character);
 	
-	//hide the UI
-	SetHiddenInGame(true);
-
-	//if you are not the server, not doing on server because server doesnt have anyone playing the game 
-	if (!GetOwner()->HasAuthority())
+	if (GetNetMode() != NM_DedicatedServer)
 	{
-		//grab any visual primtive components
+		SetHiddenInGame(true);
+
 		for (auto& VisualComp : GetOwner()->GetComponentsByClass(UPrimitiveComponent::StaticClass()))
 		{
 			if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(VisualComp))
 			{
-				//disable outline around interactable object
 				Prim->SetRenderCustomDepth(false);
 			}
 		}
 	}
 }
 
-void UInteractionComponent::BeginInteract(ASurvivalCharacter* Character)
+void UInteractionComponent::BeginInteract(class ASurvivalCharacter* Character)
 {
 	if (CanInteract(Character))
 	{
@@ -140,13 +136,13 @@ void UInteractionComponent::BeginInteract(ASurvivalCharacter* Character)
 	}
 }
 
-void UInteractionComponent::EndInteract(ASurvivalCharacter* Character)
+void UInteractionComponent::EndInteract(class ASurvivalCharacter* Character)
 {
 	Interactors.RemoveSingle(Character);
 	OnEndInteract.Broadcast(Character);
 }
 
-void UInteractionComponent::Interact(ASurvivalCharacter* Character)
+void UInteractionComponent::Interact(class ASurvivalCharacter* Character)
 {
 	if (CanInteract(Character))
 	{
